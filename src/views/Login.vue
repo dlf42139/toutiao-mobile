@@ -11,12 +11,13 @@
       </van-field>
     </van-cell-group>
     <!-- 登录按钮 -->
-    <van-button type="info">登&nbsp;&nbsp;&nbsp;录</van-button>
-
+    <van-button type="info" @click="toLogin">登&nbsp;&nbsp;&nbsp;录</van-button>
   </div>
 </template>
 
 <script>
+import { login } from '../api/user'
+import { Toast, Notify } from 'vant'
 export default {
   data () {
     return {
@@ -25,16 +26,31 @@ export default {
         code: '246810'
       }
     }
+  },
+  methods: {
+    async toLogin () {
+      try {
+        const data = await login(this.user)
+        console.log(data)
+        Notify({
+          message: '登录成功',
+          duration: 1000,
+          background: '#1989fa'
+        })
+      } catch (error) {
+        Toast.fail('登录失败')
+      }
+    }
   }
 }
 </script>
 
 <style lang="less" scoped>
-  .van-nav-bar {
-    background-color: rgb(240, 240, 240);
-  }
-  .van-button {
-    width: 100%;
-    margin-top: 18px;
-  }
+.van-nav-bar {
+  background-color: rgb(240, 240, 240);
+}
+.van-button {
+  width: 100%;
+  margin-top: 18px;
+}
 </style>
