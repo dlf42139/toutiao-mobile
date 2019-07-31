@@ -1,7 +1,6 @@
 <template>
   <div id="app">
-    <van-button type="primary">hhh</van-button>
-    <div class="test"></div>
+    <router-view></router-view>
   </div>
 </template>
 
