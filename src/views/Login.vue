@@ -18,6 +18,7 @@
 <script>
 import { login } from '../api/user'
 import { Toast, Notify } from 'vant'
+// import { mapMutations } from 'vuex'
 export default {
   data () {
     return {
@@ -28,10 +29,12 @@ export default {
     }
   },
   methods: {
+    // ...mapMutations(['setUserToken',data]),
     async toLogin () {
       try {
         const data = await login(this.user)
         console.log(data)
+        this.$store.commit('setUserToken', data)
         Notify({
           message: '登录成功',
           duration: 1000,
