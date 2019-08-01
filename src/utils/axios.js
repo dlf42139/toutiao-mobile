@@ -1,11 +1,20 @@
 import axios from 'axios'
-
+import store from '../store'
 const axiosInstance = axios.create({
   baseURL: 'http://ttapi.research.itcast.cn/'
 })
 
 // 请求拦截器
 axiosInstance.interceptors.request.use((config) => {
+  // const user = window.localStorage.getItem('user')
+  // if (user) {
+  //   config.headers.Authorization = 'Bearer ' + JSON.parse(user).token
+  // }
+  // userToken里面有俩数据，别忘了再点一下
+  const user = store.state.userToken
+  if (config.url !== 'app/v1_0/authorizations' && user) {
+    config.headers.Authorization = 'Bearer ' + user.token
+  }
   return config
 }, (err) => {
   return Promise.reject(err)

@@ -7,7 +7,6 @@ import zh from 'vee-validate/dist/locale/zh_CN'
 import VeeValidate, { Validator } from 'vee-validate'
 import 'vant/lib/index.css'
 import 'amfe-flexible/index.min.js'
-import './styles/index.css'
 
 Vue.use(Vant)
 Vue.use(VeeValidate)

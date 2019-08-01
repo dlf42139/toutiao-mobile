@@ -4,7 +4,7 @@
     <van-nav-bar title="首 页" fixed />
     <!-- 滑动的频道tab -->
     <van-tabs v-model="activeName" class="mychannel-tabs">
-      <van-tab title="标签 1" name="a">
+      <van-tab v-for="item in channels" :key="item.id" :title="item.name" name="item.id">
         <!-- 新闻列表 -->
         <van-pull-refresh v-model="isLoading" @refresh="onRefresh">
           <van-list v-model="loading" :finished="finished" finished-text="没有更多了" @load="onLoad">
@@ -12,25 +12,45 @@
           </van-list>
         </van-pull-refresh>
       </van-tab>
-      <!-- 其他tab页的内容 -->
-      <van-tab title="标签 2" name="b">内容 2</van-tab>
-      <van-tab title="标签 3" name="c">内容 3</van-tab>
     </van-tabs>
   </div>
 </template>
 
 <script>
+import { getChannels } from '../api/channel'
+import { mapState } from 'vuex'
 export default {
   data () {
     return {
       list: [],
+      channels: [],
       loading: false,
       finished: false,
       activeName: 'a',
       isLoading: false
     }
   },
+  created () {
+    this.huoquChannels()
+  },
+  computed: {
+    ...mapState[('userToken')]
+  },
   methods: {
+    // 获取频道列表
+    async huoquChannels () {
+      const localChannels = JSON.parse(window.localStorage.getItem('channels'))
+      // 没登录且没本地，或者已登录，都是要发请求的
+      if ((!this.userToken && !localChannels) || this.userToken) {
+        const data = await getChannels()
+        this.channels = data.channels
+        console.log(data.channels)
+      }
+      // 没登录但是有本地，才从本地获取
+      if (!this.userToken && localChannels) {
+        this.channels = localChannels
+      }
+    },
     //   加载内容
     onLoad () {
       // 异步更新数据
@@ -65,6 +85,9 @@ export default {
   .van-nav-bar__title {
     color: #ffffff;
   }
+}
+.mychannel-tabs {
+  margin-bottom: 100px;
 }
 .mychannel-tabs /deep/ .van-tabs__wrap {
   position: fixed;
