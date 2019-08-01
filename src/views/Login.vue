@@ -58,6 +58,7 @@ export default {
             background: '#1989fa'
           })
           this.loginStatus = false
+          this.$router.push('/')
         } catch (error) {
           Toast.fail('登录失败')
         }
