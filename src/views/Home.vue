@@ -7,8 +7,32 @@
       <van-tab v-for="item in channels" :key="item.id" :title="item.name">
         <!-- 新闻列表 -->
         <van-pull-refresh v-model="item.downPullLoading" @refresh="onRefresh">
-          <van-list v-model="item.upPullLoading" :finished="item.upPullFinished" finished-text="没有更多了" @load="onLoad">
-            <van-cell v-for="val in item.news" :key="val.art_id" :title="val.title" />
+          <van-list
+            v-model="item.upPullLoading"
+            :finished="item.upPullFinished"
+            finished-text="没有更多了"
+            @load="onLoad"
+          >
+            <van-cell v-for="val in item.news" :key="val.art_id" :title="val.title">
+              <template slot="label">
+                <van-grid v-show="val.cover.type != 0" :border="false" :column-num="3">
+                  <van-grid-item v-for="(srcitem,index) in val.cover.images" :key="index">
+                    <van-image :src="srcitem" lazy-load />
+                  </van-grid-item>
+                </van-grid>
+                <span>作者:{{val.aut_name}}</span>
+                &nbsp;&nbsp;
+                <span>评论数:{{val.comm_count}}</span>
+                &nbsp;&nbsp;
+                <span>发布时间:{{val.pubdate | getRelativeTime}}</span>
+                &nbsp;&nbsp;
+                <van-icon name="cross" @click="showPopup"/>
+                <van-popup v-model="ishowPopup">内容</van-popup>
+                <!-- 弹出框——更多操作 -->
+                <more-action v-model="ishowPopup"></more-action>
+                <!-- <van-popup v-model="ishowPopup">内容</van-popup> -->
+              </template>
+            </van-cell>
           </van-list>
         </van-pull-refresh>
       </van-tab>
@@ -20,6 +44,7 @@
 import { getChannels } from '../api/channel'
 import { getNews } from '../api/article'
 import { mapState } from 'vuex'
+import MoreAction from './dialog/MoreAction'
 export default {
   data () {
     return {
@@ -28,19 +53,34 @@ export default {
       loading: false,
       finished: false,
       activeName: 0,
-      isLoading: false
+      isLoading: false,
+      ishowPopup: false
     }
+  },
+  components: {
+    MoreAction
   },
   created () {
     this.huoquChannels()
   },
   computed: {
-    ...mapState[('userToken')],
+    ...mapState['userToken'],
     currentChannel () {
       return this.channels[this.activeName]
     }
   },
+  watch: {
+    '$store.state.userToken' (newV, oldV) {
+      console.log('来来来')
+      this.huoquChannels()
+      this.currentChannel.upPullLoading = true
+      this.loadNews()
+    }
+  },
   methods: {
+    showPopup () {
+      this.ishowPopup = true
+    },
     // 获取频道列表
     async huoquChannels () {
       const localChannels = JSON.parse(window.localStorage.getItem('channels'))
@@ -71,25 +111,28 @@ export default {
         with_top: cc.with_top
       }
       let rel = await getNews(data)
+      // console.log(this.currentChannel)
       return rel
     },
     // 这个是ui组件自带的函数，加载内容
     async onLoad () {
-      // this.loadNews()
+      await this.$sleep(600)
       let rel = await this.loadNews()
-      if (rel.results.length === 0) {
+      if (rel.pre_timestamp && rel.results.length === 0) {
         this.currentChannel.timestamp = rel.pre_timestamp
         rel = await this.loadNews()
       }
+      if (!rel.pre_timestamp && rel.results.length === 0) {
+        this.currentChannel.upPullFinished = true
+        this.currentChannel.upPullLoading = false
+      }
       this.currentChannel.timestamp = rel.pre_timestamp
-      // this.currentChannel.news = rel.results
       // 保存已加载出来的文章数据，取消动画，应该是push，不是直接赋值，不然就把前面的也搞没了
       this.currentChannel.news.push(...rel.results)
       this.currentChannel.upPullLoading = false
     },
     // 页面刷新
-    onRefresh () {
-    }
+    onRefresh () {}
   }
 }
 </script>
