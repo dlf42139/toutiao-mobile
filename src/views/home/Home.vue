@@ -6,7 +6,7 @@
     <van-tabs v-model="activeName" class="mychannel-tabs">
       <van-tab v-for="item in channels" :key="item.id" :title="item.name">
         <!-- 新闻列表 -->
-        <van-pull-refresh v-model="item.downPullLoading" @refresh="onRefresh">
+        <van-pull-refresh :success-text="item.pullSuccessText" v-model="item.downPullLoading" @refresh="onRefresh">
           <van-list
             v-model="item.upPullLoading"
             :finished="item.upPullFinished"
@@ -48,6 +48,7 @@ import { getChannels } from '../../api/channel.js'
 import { getNews } from '../../api/article.js'
 import { mapState } from 'vuex'
 import MoreAction from './MoreAction.vue'
+// import { Toast, Notify } from 'vant'
 export default {
   data () {
     return {
@@ -107,6 +108,7 @@ export default {
           element.downPullLoading = false // 当前频道下拉状态
           element.upPullLoading = false // 当前频道上拉加载更多
           element.upPullFinished = false // 当前频道加载完毕
+          element.pullSuccessText = null
         })
         this.channels = data.channels
       }
@@ -144,7 +146,23 @@ export default {
       this.currentChannel.upPullLoading = false
     },
     // 页面刷新
-    onRefresh () {}
+    async onRefresh () {
+      console.log(this.currentChannel)
+      this.currentChannel.timestamp = Date.now()
+      const data = await this.loadNews()
+      if (data.results.length) {
+        this.currentChannel.news = data.results
+        this.currentChannel.timestamp = data.pre_timestamp
+        this.pullSuccessText = '加载成功'
+        this.$toast('刷新成功')
+      } else {
+        this.pullSuccessText = '已是最新'
+        this.$toast('已是最新')
+      }
+      this.currentChannel.downPullLoading = false
+      console.log(data)
+      // console.log(Date.now())
+    }
   }
 }
 </script>
