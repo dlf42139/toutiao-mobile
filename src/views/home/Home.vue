@@ -13,7 +13,7 @@
             finished-text="没有更多了"
             @load="onLoad"
           >
-            <van-cell v-for="val in item.news" :key="val.art_id" :title="val.title">
+            <van-cell v-for="val in item.news" :key="val.art_id.toString()" :title="val.title">
               <template slot="label">
                 <van-grid v-show="val.cover.type != 0" :border="false" :column-num="3">
                   <van-grid-item v-for="(srcitem,index) in val.cover.images" :key="index">
@@ -26,10 +26,13 @@
                 &nbsp;&nbsp;
                 <span>发布时间:{{val.pubdate | getRelativeTime}}</span>
                 &nbsp;&nbsp;
-                <van-icon name="cross" @click="showPopup"/>
+                <van-icon name="cross" @click="showPopup(val)" />
                 <van-popup v-model="ishowPopup">内容</van-popup>
                 <!-- 弹出框——更多操作 -->
-                <more-action v-model="ishowPopup"></more-action>
+                <more-action
+                v-model="ishowPopup"
+                :dislike="currentArticle"
+                @disSuccess="handelDisSuccess(currentArticle)"></more-action>
                 <!-- <van-popup v-model="ishowPopup">内容</van-popup> -->
               </template>
             </van-cell>
@@ -41,10 +44,10 @@
 </template>
 
 <script>
-import { getChannels } from '../api/channel'
-import { getNews } from '../api/article'
+import { getChannels } from '../../api/channel.js'
+import { getNews } from '../../api/article.js'
 import { mapState } from 'vuex'
-import MoreAction from './dialog/MoreAction'
+import MoreAction from './MoreAction.vue'
 export default {
   data () {
     return {
@@ -54,7 +57,9 @@ export default {
       finished: false,
       activeName: 0,
       isLoading: false,
-      ishowPopup: false
+      ishowPopup: false,
+      // 这个还是要有的
+      currentArticle: null
     }
   },
   components: {
@@ -71,15 +76,22 @@ export default {
   },
   watch: {
     '$store.state.userToken' (newV, oldV) {
-      console.log('来来来')
       this.huoquChannels()
       this.currentChannel.upPullLoading = true
       this.loadNews()
     }
   },
   methods: {
-    showPopup () {
+    showPopup (val) {
+      this.currentArticle = val
       this.ishowPopup = true
+    },
+    // 对文章不喜欢后，要在父组件中处理视图
+    handelDisSuccess (val) {
+      const index = this.currentChannel.news.findIndex((item) => {
+        return item === val
+      })
+      this.currentChannel.news.splice(index, 1)
     },
     // 获取频道列表
     async huoquChannels () {

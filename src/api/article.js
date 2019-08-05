@@ -11,3 +11,13 @@ export const getNews = ({ channel_id, timestamp, with_top }) => {
     }
   })
 }
+
+export const dislikeNews = (id) => {
+  return axios({
+    method: 'post',
+    url: 'app/v1_0/article/dislikes',
+    data: {
+      target: id
+    }
+  })
+}
