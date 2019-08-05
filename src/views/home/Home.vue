@@ -3,10 +3,17 @@
     <!-- navbar -->
     <van-nav-bar title="首 页" fixed />
     <!-- 滑动的频道tab -->
-    <van-tabs v-model="activeName" class="mychannel-tabs">
+    <van-tabs v-model="activeName" class="mychannel-tabs" animated>
+      <div slot="nav-right" class="channel-menu" @click="ishowChannel">
+        <van-icon name="wap-nav"></van-icon>
+      </div>
       <van-tab v-for="item in channels" :key="item.id" :title="item.name">
         <!-- 新闻列表 -->
-        <van-pull-refresh :success-text="item.pullSuccessText" v-model="item.downPullLoading" @refresh="onRefresh">
+        <van-pull-refresh
+          :success-text="item.pullSuccessText"
+          v-model="item.downPullLoading"
+          @refresh="onRefresh"
+        >
           <van-list
             v-model="item.upPullLoading"
             :finished="item.upPullFinished"
@@ -30,9 +37,10 @@
                 <van-popup v-model="ishowPopup">内容</van-popup>
                 <!-- 弹出框——更多操作 -->
                 <more-action
-                v-model="ishowPopup"
-                :dislike="currentArticle"
-                @disSuccess="handelDisSuccess(currentArticle)"></more-action>
+                  v-model="ishowPopup"
+                  :dislike="currentArticle"
+                  @disSuccess="handelDisSuccess(currentArticle)"
+                ></more-action>
                 <!-- <van-popup v-model="ishowPopup">内容</van-popup> -->
               </template>
             </van-cell>
@@ -40,6 +48,8 @@
         </van-pull-refresh>
       </van-tab>
     </van-tabs>
+    <!-- 弹出的编辑频道pop -->
+    <channel v-model="isshowChannelPop"></channel>
   </div>
 </template>
 
@@ -48,6 +58,7 @@ import { getChannels } from '../../api/channel.js'
 import { getNews } from '../../api/article.js'
 import { mapState } from 'vuex'
 import MoreAction from './MoreAction.vue'
+import Channel from './Channel.vue'
 // import { Toast, Notify } from 'vant'
 export default {
   data () {
@@ -60,11 +71,13 @@ export default {
       isLoading: false,
       ishowPopup: false,
       // 这个还是要有的
-      currentArticle: null
+      currentArticle: null,
+      isshowChannelPop: false
     }
   },
   components: {
-    MoreAction
+    MoreAction,
+    Channel
   },
   created () {
     this.huoquChannels()
@@ -83,13 +96,16 @@ export default {
     }
   },
   methods: {
+    ishowChannel () {
+      this.isshowChannelPop = true
+    },
     showPopup (val) {
       this.currentArticle = val
       this.ishowPopup = true
     },
     // 对文章不喜欢后，要在父组件中处理视图
     handelDisSuccess (val) {
-      const index = this.currentChannel.news.findIndex((item) => {
+      const index = this.currentChannel.news.findIndex(item => {
         return item === val
       })
       this.currentChannel.news.splice(index, 1)
@@ -147,7 +163,7 @@ export default {
     },
     // 页面刷新
     async onRefresh () {
-      console.log(this.currentChannel)
+      // console.log(this.currentChannel)
       this.currentChannel.timestamp = Date.now()
       const data = await this.loadNews()
       if (data.results.length) {
@@ -160,7 +176,7 @@ export default {
         this.$toast('已是最新')
       }
       this.currentChannel.downPullLoading = false
-      console.log(data)
+      // console.log(data)
       // console.log(Date.now())
     }
   }
@@ -186,5 +202,14 @@ export default {
 
 .mychannel-tabs /deep/ .van-tabs__content {
   margin-top: 180px;
+}
+.mychannel-tabs /deep/ .channel-menu {
+  box-sizing: border-box;
+  padding-top: 5px;
+  position: fixed;
+  right: 0;
+  i {
+    vertical-align: middle;
+  }
 }
 </style>
