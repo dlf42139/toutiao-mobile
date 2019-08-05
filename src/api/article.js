@@ -21,3 +21,15 @@ export const dislikeNews = (id) => {
     }
   })
 }
+
+export const reportNews = ({ id, type, remark }) => {
+  return axios({
+    method: 'post',
+    url: 'app/v1_0/article/reports',
+    data: {
+      target: id,
+      type,
+      remark: '0'
+    }
+  })
+}
