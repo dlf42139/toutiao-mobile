@@ -33,14 +33,15 @@
                 &nbsp;&nbsp;
                 <span>发布时间:{{val.pubdate | getRelativeTime}}</span>
                 &nbsp;&nbsp;
-                <van-icon name="cross" @click="showPopup(val)" />
-                <van-popup v-model="ishowPopup">内容</van-popup>
+                <van-icon name="cross" @click="showDialog(val)" />
+                <van-popup v-model="ishowdialog">内容</van-popup>
                 <!-- 弹出框——更多操作 -->
-                <more-action
+                <action v-model="ishowdialog" :dislike="currentArticle" @disSuccess="handelDisSuccess(currentArticle)"></action>
+                <!-- <more-action
                   v-model="ishowPopup"
                   :dislike="currentArticle"
                   @disSuccess="handelDisSuccess(currentArticle)"
-                ></more-action>
+                ></more-action> -->
                 <!-- <van-popup v-model="ishowPopup">内容</van-popup> -->
               </template>
             </van-cell>
@@ -57,7 +58,8 @@
 import { getChannels } from '../../api/channel.js'
 import { getNews } from '../../api/article.js'
 import { mapState } from 'vuex'
-import MoreAction from './MoreAction.vue'
+// import MoreAction from './MoreAction.vue'
+import Action from './Action.vue'
 import Channel from './Channel.vue'
 // import { Toast, Notify } from 'vant'
 export default {
@@ -69,14 +71,14 @@ export default {
       finished: false,
       activeName: 0,
       isLoading: false,
-      ishowPopup: false,
+      ishowdialog: false,
       // 这个还是要有的
       currentArticle: null,
       isshowChannelPop: false
     }
   },
   components: {
-    MoreAction,
+    Action,
     Channel
   },
   created () {
@@ -99,9 +101,9 @@ export default {
     ishowChannel () {
       this.isshowChannelPop = true
     },
-    showPopup (val) {
+    showDialog (val) {
       this.currentArticle = val
-      this.ishowPopup = true
+      this.ishowdialog = true
     },
     // 对文章不喜欢后，要在父组件中处理视图
     handelDisSuccess (val) {
@@ -197,7 +199,7 @@ export default {
   position: fixed;
   width: 100%;
   top: 92px;
-  z-index: 666;
+  z-index: 500;
 }
 
 .mychannel-tabs /deep/ .van-tabs__content {
@@ -212,4 +214,5 @@ export default {
     vertical-align: middle;
   }
 }
+
 </style>

@@ -2,10 +2,10 @@
   <van-dialog
     :value="value"
     @input="$emit('input')"
-    :show-confirm-button="showConfimBtn"
+    :show-confirm-button="false"
     :close-on-click-overlay="true"
   >
-    <van-cell-group v-if="!fankui">
+  <van-cell-group v-if="!fankui">
       <van-cell @click="addDislike()" icon="location-o" title="不感兴趣" />
       <van-cell icon="location-o" title="反馈垃圾内容" is-link @click="fankui=true" />
       <van-cell icon="location-o" title="拉黑作者" />
@@ -20,6 +20,7 @@
         icon="location-o"
       />
     </van-cell-group>
+
   </van-dialog>
 </template>
 
@@ -29,7 +30,6 @@ export default {
   props: ['value', 'dislike'],
   data () {
     return {
-      showConfimBtn: false,
       fankui: false,
       reportdata: [
         { label: '其他问题', value: 0 },
@@ -82,6 +82,6 @@ export default {
   }
 }
 </script>
+<style scoped lang="less">
 
-<style>
 </style>
